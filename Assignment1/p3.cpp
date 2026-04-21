@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 
 #include "al/app/al_App.hpp"  // al::App
@@ -13,14 +14,16 @@ float rs() { return rnd::uniformS(); }
 
 struct MyApp : public App 
 {
-    ParameterInt populationNumber{"Population number", "", 50, 2, 100};
+    ParameterInt populationNumber{"Population number", "", 15, 2, 80};
     // dis r two great suitable turn speed
-    Parameter moveSpeed{"Move speed", "", 2.0, 1.0, 5.0};
-    Parameter turnSpeed{"Turn speed", "", 0.01, 0.005, 0.05};
+    Parameter moveSpeed{"Move speed", "", 5.0, 1.0, 10.0};
+    Parameter turnSpeed{"Turn speed", "", 0.01, 0.005, 0.3};
     ParameterColor backgroundColor{"Background color"};
     Parameter neighborDistance{"Neighbor distance", "", 10, 5, 20};
     Parameter intimateDistance{"Intimate distance", "", 0.5, 0.1, 1};
     Parameter aloofDistance{"Aloof distance", "", 4, 3, 4};
+	Parameter worldSize{"World size", "", 20.0, 10.0, 50.0};
+	Parameter renderRadius{"Render radius", "", 100.0, 50.0, 300.0};
 
 
 
@@ -31,6 +34,18 @@ struct MyApp : public App
 
     std::vector<Nav> agent;
     std::vector<int> lovedNeighbour;
+
+
+    // tiling method started from cursor
+    // conversation here (the beginning 2 quests are irrevelant other stuff)
+    // Assignment1/Wrapping around method.md
+	Vec3d nearestTileShift(Vec3d p, Vec3d cam, double worldSize) const
+	{
+		double kx = std::round((cam.x - p.x) / worldSize);
+		double ky = std::round((cam.y - p.y) / worldSize);
+		double kz = std::round((cam.z - p.z) / worldSize);
+		return Vec3d(kx, ky, kz) * worldSize;
+	}
 
     void randomlyFallInLove() 
     {
@@ -52,10 +67,13 @@ struct MyApp : public App
         auto &gui = GUIdomain->newGUI();
         gui.add(populationNumber);
         gui.add(moveSpeed);
+		gui.add(turnSpeed);
         gui.add(backgroundColor);
         gui.add(neighborDistance);
         gui.add(intimateDistance);
         gui.add(aloofDistance);
+		gui.add(worldSize);
+		gui.add(renderRadius);
     }
     
     void reset(int n) 
@@ -65,7 +83,7 @@ struct MyApp : public App
         randomlyFallInLove();
         for (auto& a : agent) 
         {
-            a.pos(Vec3d(rs(), rs(), rs())*5);
+			a.pos(Vec3d(rs(), rs(), rs()) * (worldSize * 0.01));
             a.quat(Quatd(Vec3d(rs(), rs(), rs())).normalize());
         }
     }
@@ -77,7 +95,7 @@ struct MyApp : public App
         mesh.scale(0.2);
         mesh.generateNormals();
 
-        nav().pos(0, 0, 15);
+        nav().pos(0, 0, 50);
         light.pos(-2, 7, 0);
     }
 
@@ -105,7 +123,7 @@ struct MyApp : public App
             auto& me = agent[i];
 
             // me versus them
-            Vec3d sum;
+            Vec3d sum(0, 0, 0);
             int count = 0;
 
             //count neighbours
@@ -119,7 +137,7 @@ struct MyApp : public App
                 auto& them = agent[j];
 
                 
-                float distance = (me.pos() - them.pos()).mag();
+				float distance = (me.pos() - them.pos()).mag();
                 if (distance < neighborDistance) 
                 {
                     count++;
@@ -127,7 +145,7 @@ struct MyApp : public App
                     // if we r too close we must be apart :(
                     if (distance < intimateDistance)
                     {
-                        me.nudgeToward(them.pos(), -0.5*intimateDistance);
+                        me.nudgeToward(them.pos(), -0.5 * intimateDistance);
                     }
                     sum += them.pos();
                 }
@@ -149,14 +167,11 @@ struct MyApp : public App
 
 
                 // dis cause a huge chain blast of all things...
+                // probably because instant speed was way too fast
+                // does nudge increase speed??? or just position change
                 if (distance > aloofDistance)
                 {
-                    Vec3d away = me.pos() - center;
-					if (away.mag() > 0.0)
-					{
-						away.normalize();
-						me.pos(center + away * aloofDistance);
-					}
+                   me.nudgeToward(center, 0.1 * aloofDistance);
                 }
                 
             }
@@ -181,13 +196,32 @@ struct MyApp : public App
 
         g.material(material);
 
+		Vec3d cam = nav().pos();
+        // TODO: something wrong with the render Radius need to be fixed
+        // dis is AI making mistakes
+		int copies = (int)std::ceil(renderRadius / worldSize) + 1;
         for (auto& a : agent) 
         {
-            g.pushMatrix();
-            g.translate(a.pos());
-            g.rotate(a.quat());
-            g.draw(mesh);
-            g.popMatrix();
+			Vec3d base = a.pos() + nearestTileShift(a.pos(), cam, worldSize);
+			for (int ix = -copies; ix <= copies; ix++)
+			{
+				for (int iy = -copies; iy <= copies; iy++)
+				{
+					for (int iz = -copies; iz <= copies; iz++)
+					{
+						Vec3d p = base + Vec3d(ix, iy, iz) * worldSize;
+						if ((p - cam).mag() > renderRadius)
+						{
+							continue;
+						}
+						g.pushMatrix();
+						g.translate(p);
+						g.rotate(a.quat());
+						g.draw(mesh);
+						g.popMatrix();
+					}
+				}
+			}
         }
     }
 };
