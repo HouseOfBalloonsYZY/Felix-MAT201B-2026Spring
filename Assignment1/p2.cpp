@@ -10,11 +10,16 @@ using namespace al;
 float r() { return rnd::uniform(); }
 float rs() { return rnd::uniformS(); }
 
+
 struct MyApp : public App 
 {
     ParameterInt populationNumber{"Population number", "", 50, 2, 100};
     Parameter speed{"Speed", "", 2.0, 1.0, 5.0};
     ParameterColor backgroundColor{"Background color"};
+    Parameter neighborDistance{"Neighbor distance", "", 10, 5, 20};
+    Parameter intimateDistance{"Intimate distance", "", 0.5, 0.1, 1};
+
+
 
     Light light;
     Material material;
@@ -28,14 +33,14 @@ struct MyApp : public App
     {
         lovedNeighbour.clear();
         lovedNeighbour.resize(agent.size());
-        for (auto& i : lovedNeighbour) 
-        {
-            lovedNeighbour[i] = rand()%(agent.size() - 1);
-            while (lovedNeighbour[i] == i) 
-            {
-                lovedNeighbour[i] = rand()%(agent.size() - 1);
-            }
-        }
+		for (int i = 0; i < (int)lovedNeighbour.size(); i++)
+		{
+			lovedNeighbour[i] = rand() % (agent.size() - 1);
+			while (lovedNeighbour[i] == i)
+			{
+				lovedNeighbour[i] = rand() % (agent.size() - 1);
+			}
+		}
     }
 
     void onInit() override 
@@ -45,6 +50,8 @@ struct MyApp : public App
         gui.add(populationNumber);
         gui.add(speed);
         gui.add(backgroundColor);
+        gui.add(neighborDistance);
+        gui.add(intimateDistance);
     }
     
     void reset(int n) 
@@ -54,7 +61,7 @@ struct MyApp : public App
         randomlyFallInLove();
         for (auto& a : agent) 
         {
-            a.pos(Vec3d(rs(), rs(), rs()));
+            a.pos(Vec3d(rs(), rs(), rs())*5);
             a.quat(Quatd(Vec3d(rs(), rs(), rs())).normalize());
         }
     }
@@ -82,12 +89,37 @@ struct MyApp : public App
         // running towards ur love
         for (int i = 0; i < agent.size(); i++)
         {
-            //first drift a bit
+            // first drift a bit
             agent[i].moveF(speed);
 
             // then turn a little towards loved one
-            agent[i].faceTowardLine(agent[lovedNeighbour[i]].pos(), agent[i].uu(), dt); //confused by dt here, feels like i'm absuing dt
-            // agent[i].nudgeToward(agent[lovedNeighbour[i]].pos(), 2);
+            agent[i].faceTowardLine(agent[lovedNeighbour[i]].pos(), agent[i].uu(), dt);
+        }
+
+        // TODO: if as a never-nester how to improve dis code
+        for (int i = 0; i < agent.size(); i++) 
+        {
+            auto& me = agent[i];
+            
+            for (int j = 0; j < agent.size(); j++) 
+            {
+                if (i == j) 
+                {
+                    continue;
+                }
+
+                auto& them = agent[j];
+                
+                float distance = (me.pos() - them.pos()).mag();
+                if (distance < neighborDistance) 
+                {
+                    // if we r too close we must be apart :(
+                    if (distance < intimateDistance)
+                    {
+                        me.nudgeToward(them.pos(), -0.5*intimateDistance);
+                    }
+                }
+            }
         }
 
         for (auto& a : agent) 
