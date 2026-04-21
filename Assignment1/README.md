@@ -8,7 +8,8 @@
 
 3. Interesting finding: my bluetooth headphone breaks the program. The error code was
     ```
-    RtApiCore::probeDeviceOpen: system error (kAudioHardwareIllegalOperationError) setting sample rate for device (1). RtApiCore::probeDeviceOpen: system error (kAudioHardwareIllegalOperationError) setting sample rate for device (1). 
+    RtApiCore::probeDeviceOpen: system error (kAudioHardwareIllegalOperationError) setting sample rate for device (1). 
+    RtApiCore::probeDeviceOpen: system error (kAudioHardwareIllegalOperationError) setting sample rate for device (1). 
     RtApi:: a stream is not open!
     ```
     AI says it's because "indicates that the software is trying to set a sample rate (e.g., 44.1 kHz or 48 kHz) that your current audio hardware or driver cannot accept"
