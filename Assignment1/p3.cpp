@@ -1,5 +1,3 @@
-// starter code from Karl
-
 #include <iostream>
 
 #include "al/app/al_App.hpp"  // al::App
@@ -12,6 +10,7 @@ using namespace al;
 float r() { return rnd::uniform(); }
 float rs() { return rnd::uniformS(); }
 
+
 struct MyApp : public App 
 {
     ParameterInt populationNumber{"Population number", "", 50, 2, 100};
@@ -19,6 +18,11 @@ struct MyApp : public App
     Parameter moveSpeed{"Move speed", "", 2.0, 1.0, 5.0};
     Parameter turnSpeed{"Turn speed", "", 0.01, 0.005, 0.05};
     ParameterColor backgroundColor{"Background color"};
+    Parameter neighborDistance{"Neighbor distance", "", 10, 5, 20};
+    Parameter intimateDistance{"Intimate distance", "", 0.5, 0.1, 1};
+    Parameter aloofDistance{"Aloof distance", "", 4, 3, 4};
+
+
 
     Light light;
     Material material;
@@ -32,14 +36,14 @@ struct MyApp : public App
     {
         lovedNeighbour.clear();
         lovedNeighbour.resize(agent.size());
-        for (auto& i : lovedNeighbour) 
-        {
-            lovedNeighbour[i] = rand()%(agent.size() - 1);
-            while (lovedNeighbour[i] == i) 
-            {
-                lovedNeighbour[i] = rand()%(agent.size() - 1);
-            }
-        }
+		for (int i = 0; i < (int)lovedNeighbour.size(); i++)
+		{
+			lovedNeighbour[i] = rand() % (agent.size() - 1);
+			while (lovedNeighbour[i] == i)
+			{
+				lovedNeighbour[i] = rand() % (agent.size() - 1);
+			}
+		}
     }
 
     void onInit() override 
@@ -48,8 +52,10 @@ struct MyApp : public App
         auto &gui = GUIdomain->newGUI();
         gui.add(populationNumber);
         gui.add(moveSpeed);
-        gui.add(turnSpeed);
         gui.add(backgroundColor);
+        gui.add(neighborDistance);
+        gui.add(intimateDistance);
+        gui.add(aloofDistance);
     }
     
     void reset(int n) 
@@ -59,7 +65,7 @@ struct MyApp : public App
         randomlyFallInLove();
         for (auto& a : agent) 
         {
-            a.pos(Vec3d(rs(), rs(), rs()));
+            a.pos(Vec3d(rs(), rs(), rs())*5);
             a.quat(Quatd(Vec3d(rs(), rs(), rs())).normalize());
         }
     }
@@ -84,13 +90,76 @@ struct MyApp : public App
             reset(populationNumber);
         }
 
-        // running towards ur love
         for (int i = 0; i < agent.size(); i++)
         {
-            //first go a bit
+            // first drift a bit
             agent[i].moveF(moveSpeed);
-            // then turn to love
+
+            // then turn a little towards loved one
             agent[i].faceToward(agent[lovedNeighbour[i]].pos(), turnSpeed);
+        }
+
+        // // // TODO: if as a never nester how to improve dis code
+        for (int i = 0; i < agent.size(); i++) 
+        {
+            auto& me = agent[i];
+
+            // me versus them
+            Vec3d sum;
+            int count = 0;
+
+            //count neighbours
+            for (int j = 0; j < agent.size(); j++) 
+            {
+                if (i == j) 
+                {
+                    continue;
+                }
+
+                auto& them = agent[j];
+
+                
+                float distance = (me.pos() - them.pos()).mag();
+                if (distance < neighborDistance) 
+                {
+                    count++;
+
+                    // if we r too close we must be apart :(
+                    if (distance < intimateDistance)
+                    {
+                        me.nudgeToward(them.pos(), -0.5*intimateDistance);
+                    }
+                    sum += them.pos();
+                }
+                sum += me.pos();
+            }
+
+
+            if (count > 1)
+            {
+                Vec3d center = sum / (count + 1);
+                float distance = (me.pos() - center).mag();
+
+                // // dis breaks here, wondering why
+				// while (distance > aloofDistance)
+				// {
+				// 	me.nudgeToward(center, intimateDistance);
+                //     distance = (me.pos() - center).mag();
+				// }
+
+
+                // dis cause a huge chain blast of all things...
+                if (distance > aloofDistance)
+                {
+                    Vec3d away = me.pos() - center;
+					if (away.mag() > 0.0)
+					{
+						away.normalize();
+						me.pos(center + away * aloofDistance);
+					}
+                }
+                
+            }
         }
 
         for (auto& a : agent) 

@@ -13,7 +13,6 @@ float rs() { return rnd::uniformS(); }
 struct MyApp : public App 
 {
     ParameterInt populationNumber{"/N", "", 50, 2, 100};
-    // Parameter speed{"Speed", "", 2.0, 1.0, 5.0};
     ParameterColor backgroundColor{"/color"};
 
     Light light;
@@ -45,7 +44,6 @@ struct MyApp : public App
         auto GUIdomain = GUIDomain::enableGUI(defaultWindowDomain());
         auto &gui = GUIdomain->newGUI();
         gui.add(populationNumber);
-        // gui.add(speed);
         gui.add(backgroundColor);
     }
     

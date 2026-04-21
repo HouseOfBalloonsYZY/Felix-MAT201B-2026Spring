@@ -14,7 +14,9 @@ float rs() { return rnd::uniformS(); }
 struct MyApp : public App 
 {
     ParameterInt populationNumber{"Population number", "", 50, 2, 100};
-    Parameter speed{"Speed", "", 2.0, 1.0, 5.0};
+    // dis r two great suitable turn speed
+    Parameter moveSpeed{"Move speed", "", 2.0, 1.0, 5.0};
+    Parameter turnSpeed{"Turn speed", "", 0.01, 0.005, 0.05};
     ParameterColor backgroundColor{"Background color"};
     Parameter neighborDistance{"Neighbor distance", "", 10, 5, 20};
     Parameter intimateDistance{"Intimate distance", "", 0.5, 0.1, 1};
@@ -48,7 +50,8 @@ struct MyApp : public App
         auto GUIdomain = GUIDomain::enableGUI(defaultWindowDomain());
         auto &gui = GUIdomain->newGUI();
         gui.add(populationNumber);
-        gui.add(speed);
+        gui.add(moveSpeed);
+        gui.add(turnSpeed);
         gui.add(backgroundColor);
         gui.add(neighborDistance);
         gui.add(intimateDistance);
@@ -73,7 +76,8 @@ struct MyApp : public App
         mesh.scale(0.2);
         mesh.generateNormals();
 
-        nav().pos(0, 0, 15);
+        // camera position is important aestically
+        nav().pos(0, 0, 30);
         light.pos(-2, 7, 0);
     }
 
@@ -90,17 +94,17 @@ struct MyApp : public App
         for (int i = 0; i < agent.size(); i++)
         {
             // first drift a bit
-            agent[i].moveF(speed);
+            agent[i].moveF(moveSpeed);
 
             // then turn a little towards loved one
-            agent[i].faceTowardLine(agent[lovedNeighbour[i]].pos(), agent[i].uu(), dt);
+            agent[i].faceToward(agent[lovedNeighbour[i]].pos(), turnSpeed);
         }
 
         // TODO: if as a never-nester how to improve dis code
         for (int i = 0; i < agent.size(); i++) 
         {
             auto& me = agent[i];
-            
+
             for (int j = 0; j < agent.size(); j++) 
             {
                 if (i == j) 
