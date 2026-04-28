@@ -21,13 +21,13 @@ string slurp(string fileName); // forward declaration
 
 struct AlloApp : App
 {
-    ParameterInt pointNumber{"Point Number", "", 1000, 500, 2000};
+    ParameterInt pointNumber{"Point Number", "", 1000, 500, 5000};
     Parameter pointSize{"Point size", "", 5.0, 1.0, 10.0};
-    Parameter timeStep{"Time step", "", 0.01, 0.005, 0.02};
-    Parameter dragFactor{"Drag factor", "", 0.00, 0.00, 0.90};
-    Parameter repulsivity{"Repulsivity", "", 1.0, 0.1, 5};
-    Parameter springLength{"Spring length", "", 0.001, 0.001, 1.0};
-    Parameter springTension{"Spring tension", "", 100.0, 10.0, 5000.0};
+    Parameter timeStep{"Time step", "", 0.01, 0.001, 0.02};
+    Parameter dragFactor{"Drag factor", "", 1.0, 0.00, 10.0};
+    Parameter repulsivity{"Repulsivity", "", 0.01, -1.0, 1.0};
+    Parameter springLength{"Spring length", "", 5.0, 0.1, 10.0};
+    Parameter springTension{"Spring tension", "", 2.0, 0.1, 10.0};
 
     ShaderProgram pointShader;
 
@@ -42,7 +42,7 @@ struct AlloApp : App
         // set up GUI
         auto GUIdomain = GUIDomain::enableGUI(defaultWindowDomain());
         auto &gui = GUIdomain->newGUI();
-        gui.add(pointNumber); 
+        gui.add(pointNumber);
         gui.add(pointSize);
         gui.add(timeStep);
         gui.add(dragFactor);
@@ -72,9 +72,9 @@ struct AlloApp : App
             // float m = 3 + rnd::normal() / 2;
             // if (m < 0.5)
             //     m = 0.5;
-            float m = rnd::normal();
-            if (m < 0.1)
-                m = 0.1;
+            float m = 1 + rnd::normal() / 2;
+            if (m < 0.5)
+                m = 0.5;
             mass.push_back(m);
 
             // using a simplified volume/size relationship
@@ -130,7 +130,6 @@ struct AlloApp : App
         // • .dot(Vec3f f)
         // • .cross(Vec3f f)
 
-
         vector<Vec3f> &position(mesh.vertices());
         for (int i = 0; i < mesh.vertices().size(); i++)
         {
@@ -149,22 +148,21 @@ struct AlloApp : App
 
             // me.normalize points outward
             // if springLength > me.mag(), force is outward
-            Vec3f springForce_direction = me.normalize();
+            Vec3f springForce_direction = me / me.mag(); // XXX Don't normalize
             float springForce_magnitude = (springLength - me.mag()) * springTension;
             Vec3f springForce = springForce_direction * springForce_magnitude;
 
-            //limiter
-            // if (springForce.mag() > 10)
-            // {
-            //     springForce = springForce.normalize() * 10;
-            // }
+            // limiter
+            //  if (springForce.mag() > 10)
+            //  {
+            //      springForce = springForce.normalize() * 10;
+            //  }
 
             // apply spring force
             force[i] += springForce;
 
             // Spring force
             // ***
-
 
             // ***
             // Repulsive force
@@ -187,7 +185,7 @@ struct AlloApp : App
                 // apply repulsive force
                 // i and j are a pair
                 force[i] += repulsiveForce;
-                force[j] -= repulsiveForce;                
+                force[j] -= repulsiveForce;
             }
 
             // Repulsive Force
@@ -220,7 +218,15 @@ struct AlloApp : App
             for (int i = 0; i < velocity.size(); i++)
             {
                 // F = ma
-                force[i] += randomVec3f(100);
+                force[i] += randomVec3f(10);
+            }
+        }
+
+        if (k.key() == '2')
+        {
+            for (int i = 0; i < velocity.size(); i++)
+            {
+                velocity[i] = randomVec3f(1);
             }
         }
 

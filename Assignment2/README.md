@@ -24,6 +24,8 @@ Once you have this all done, introduce an assymetrical force (love or hunger) to
 
     But somehow the outer part of the particles seems not sensitive to the spring force at all, especially the drag. I guess at this point includingthe law of conservation of energy is needed. 
 
+    **Solved. Dumb mistake. `&me` works as an address and `normalize()` changed the original thing.**
+
 2. A little more on Lambda expression?
 
 3. So I can say that we're abusing mesh to store points and only draw points but not the whole mesh right?
