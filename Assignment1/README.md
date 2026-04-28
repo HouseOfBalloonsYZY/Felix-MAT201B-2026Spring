@@ -48,6 +48,8 @@ You will turn these in with git on GitHub.
 
 5. The red lines of code in editors other than vs code (say cursor) is very annoying. Also how come it is possible for filed to find `#include "al//xxx//xxx.hpp` in any folder inside `allolib_playground/` ? And what should I do if some editors can't find it.
 
-6. The `while (distance > aloofDistance)` problem. I can't see where I had a infinite loop.
+6. ~~The `while (distance > aloofDistance)` problem. I can't see where I had a infinite loop.~~
+    
+    Ah I got this one. It's because it's still in one frame so the distance is not really changing.
 
 7. Definitely needing some GPU computing now.
