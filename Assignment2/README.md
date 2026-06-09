@@ -26,6 +26,8 @@ Once you have this all done, introduce an assymetrical force (love or hunger) to
 
     **Solved. Dumb mistake. `&me` works as an address and `normalize()` changed the original thing.**
 
+    Need more percise parameters control to make the shape actually behave as intended.
+
 2. A little more on Lambda expression?
 
 3. So I can say that we're abusing mesh to store points and only draw points but not the whole mesh right?

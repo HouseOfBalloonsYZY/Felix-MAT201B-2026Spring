@@ -20,8 +20,8 @@ struct MyApp : public App
     Parameter neighborDistance{"Neighbor distance", "", 10, 5, 20};
     Parameter intimateDistance{"Intimate distance", "", 0.5, 0.1, 1};
     Parameter aloofDistance{"Aloof distance", "", 4.0, 3.0, 5.0};
-    Parameter worldSize{"World size", "", 30.0, 10.0, 50.0};
-    Parameter renderRadius{"Render radius", "", 100.0, 50.0, 300.0};
+    // Parameter worldSize{"World size", "", 30.0, 10.0, 50.0};
+    // Parameter renderRadius{"Render radius", "", 100.0, 50.0, 300.0};
     Parameter nudgeDistance{"Nudge distance", "", 0.05, 0.01, 0.1};
 
     Light light;
@@ -30,30 +30,19 @@ struct MyApp : public App
     Mesh mesh;
 
     std::vector<Nav> agent;
-    std::vector<int> toLoveNeighbor;
-
-    // tiling method started from cursor
-    // conversation here (the beginning 2 quests are irrevelant other stuff)
-    // Assignment1/Wrapping around method.md
-    Vec3d nearestTileShift(Vec3d p, Vec3d cam, double worldSize) const
-    {
-        double kx = std::round((cam.x - p.x) / worldSize);
-        double ky = std::round((cam.y - p.y) / worldSize);
-        double kz = std::round((cam.z - p.z) / worldSize);
-        return Vec3d(kx, ky, kz) * worldSize;
-    }
+    std::vector<int> lovedByNeighbour;
 
     // XXX dis is nested function, not good
     void randomlyFallInLove()
     {
-        toLoveNeighbor.clear();
-        toLoveNeighbor.resize(agent.size());
-        for (int i = 0; i < (int)toLoveNeighbor.size(); i++)
+        lovedByNeighbour.clear();
+        lovedByNeighbour.resize(agent.size());
+        for (int i = 0; i < (int)lovedByNeighbour.size(); i++)
         {
-            toLoveNeighbor[i] = rand() % (agent.size() - 1);
-            while (toLoveNeighbor[i] == i)
+            lovedByNeighbour[i] = rand() % (agent.size() - 1);
+            while (lovedByNeighbour[i] == i)
             {
-                toLoveNeighbor[i] = rand() % (agent.size() - 1);
+                lovedByNeighbour[i] = rand() % (agent.size() - 1);
             }
         }
     }
@@ -69,8 +58,8 @@ struct MyApp : public App
         gui.add(neighborDistance);
         gui.add(intimateDistance);
         gui.add(aloofDistance);
-        gui.add(worldSize);
-        gui.add(renderRadius);
+        // gui.add(worldSize);
+        // gui.add(renderRadius);
         gui.add(nudgeDistance);
     }
 
@@ -81,7 +70,6 @@ struct MyApp : public App
         randomlyFallInLove();
         for (auto &a : agent)
         {
-            a.pos(Vec3d(rs(), rs(), rs()) * (worldSize * 0.01));
             a.quat(Quatd(Vec3d(rs(), rs(), rs())).normalize());
         }
     }
@@ -112,7 +100,8 @@ struct MyApp : public App
             agent[i].moveF(moveSpeed);
 
             // then turn a little towards loved one
-            agent[i].faceToward(agent[toLoveNeighbor[i]].pos(), turnSpeed);
+            
+            agent[lovedByNeighbour[i]].faceToward(agent[i].pos(), turnSpeed);
         }
 
         // XXX if as a never nester how to improve dis code
@@ -142,6 +131,13 @@ struct MyApp : public App
                     if (distance < intimateDistance)
                         me.nudgeToward(me.pos() - them.pos(), nudgeDistance);
 
+                    // XXX something is very wrong with the while loop
+                    // // if we r too close we must be apart :(
+                    // while (distance < intimateDistance)
+                    // {
+                    //     me.nudgeToward(me.pos() - them.pos(), nudgeDistance);
+                    //     distance += nudgeDistance;
+                    // }
                     sum += them.pos();
                 }
                 sum += me.pos();
@@ -154,6 +150,23 @@ struct MyApp : public App
 
                 if (distance > aloofDistance)
                     me.nudgeToward(center, nudgeDistance);
+
+                // XXX something is very wrong with the while loop
+                // // // dis breaks here, wondering why
+                // while (distance > aloofDistance)
+                // {
+                //     me.nudgeToward(center, nudgeDistance);
+                //     distance -= nudgeDistance;
+                //     // distance = (me.pos() - center).mag();
+                // }
+
+                // dis cause a huge chain blast of all things...
+                // probably because instant speed was way too fast
+                // does nudge increase speed??? or just position change
+                // if (distance > aloofDistance)
+                // {
+                //    me.nudgeToward(center, 0.1 * aloofDistance);
+                // }
             }
         }
 
@@ -176,32 +189,13 @@ struct MyApp : public App
 
         g.material(material);
 
-        Vec3d cam = nav().pos();
-        // TODO: something wrong with the render Radius need to be fixed
-        // dis is AI making mistakes
-        int copies = (int)std::ceil(renderRadius / worldSize) + 1;
         for (auto &a : agent)
         {
-            Vec3d base = a.pos() + nearestTileShift(a.pos(), cam, worldSize);
-            for (int ix = -copies; ix <= copies; ix++)
-            {
-                for (int iy = -copies; iy <= copies; iy++)
-                {
-                    for (int iz = -copies; iz <= copies; iz++)
-                    {
-                        Vec3d p = base + Vec3d(ix, iy, iz) * worldSize;
-                        if ((p - cam).mag() > renderRadius)
-                        {
-                            continue;
-                        }
-                        g.pushMatrix();
-                        g.translate(p);
-                        g.rotate(a.quat());
-                        g.draw(mesh);
-                        g.popMatrix();
-                    }
-                }
-            }
+            g.pushMatrix();
+            g.translate(a.pos());
+            g.rotate(a.quat());
+            g.draw(mesh);
+            g.popMatrix();
         }
     }
 };

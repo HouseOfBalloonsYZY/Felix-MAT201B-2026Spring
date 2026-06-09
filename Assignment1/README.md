@@ -1,27 +1,27 @@
 # Assignment 1
 
-Implement an interesting agent simulation in AlloLib. Use `al::Nav` as the basis of each agent. First implement *random chasing* where each agent “loves” some other random agent, following that agent wherever it goes: 1) turn a little toward your love and 2) move in the forward direction. Call this code `p1.cpp`. 
+1. Implement an interesting agent simulation in AlloLib. Use `al::Nav` as the basis of each agent. First implement *random chasing* where each agent “loves” some other random agent, following that agent wherever it goes: 1) turn a little toward your love and 2) move in the forward direction. Call this code `p1.cpp`. 
 
-Next, add code that maintains distance between agents. For each agent, search through all the other agents to find those that are closer than some threshold value. Nudge away from these too close neighbors. Call this code `p2.cpp`. 
+2. Next, add code that maintains distance between agents. For each agent, search through all the other agents to find those that are closer than some threshold value. Nudge away from these too close neighbors. Call this code `p2.cpp`. 
 
-Next, abandon love as a concept. Instead, make the agents “flock” by 
-1) adjusting their heading to match the average heading of their neighbors, 
-2) maintaining a small distance from their neighbors, while 
-3) maintaining proximity to their neighbors by nudging toward their average position. 
-For each agent, find up to K neighbors closer than some threshold distance T. Compute the average position of the neighbors and their average heading. If the agent is too far away from the center of the neighbors, nudge toward the center. If the agent is too close to any neighbor, nudge away from that neighbor. Turn a little to match the average heading. The agents may wander off into the distance, in different directions, so implement [wrap around](https://en.wikipedia.org/wiki/Wraparound_(video_games)). Call this code `p3.cpp`. 
+3. Next, abandon love as a concept. Instead, make the agents “flock” by 
+    1) adjusting their heading to match the average heading of their neighbors, 
+    2) maintaining a small distance from their neighbors, while 
+    3) maintaining proximity to their neighbors by nudging toward their average position. 
+    For each agent, find up to K neighbors closer than some threshold distance T. Compute the average position of the neighbors and their average heading. If the agent is too far away from the center of the neighbors, nudge toward the center. If the agent is too close to any neighbor, nudge away from that neighbor. Turn a little to match the average heading. The agents may wander off into the distance, in different directions, so implement [wrap around](https://en.wikipedia.org/wiki/Wraparound_(video_games)). Call this code `p3.cpp`. 
 
-Now add something interesting of your own design. Perhaps:
+4) Now add something interesting of your own design. Perhaps:
 
-- Introduce food into the system
-- Add obstacles
-- Find some way to keep agents contained without wrap around
-- Add lions that eat flocking agents
-- Make agents fight for survival
-- Give agents different traits: size, speed, agility, color
-- Give agents flexible bodies
-- ??
+    - Introduce food into the system
+    - Add obstacles
+    - Find some way to keep agents contained without wrap around
+    - Add lions that eat flocking agents
+    - Make agents fight for survival
+    - Give agents different traits: size, speed, agility, color
+    - Give agents flexible bodies
+    - ??
 
-Call this code `p4.cpp`.
+    Call this code `p4.cpp`.
 
 You will turn these in with git on GitHub.
 

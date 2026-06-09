@@ -29,18 +29,18 @@ struct MyApp : public App
     Mesh mesh;
 
     std::vector<Nav> agent;
-    std::vector<int> lovedNeighbour;
+    std::vector<int> toLoveNeighbor;
 
     void randomlyFallInLove() 
     {
-        lovedNeighbour.clear();
-        lovedNeighbour.resize(agent.size());
-		for (int i = 0; i < (int)lovedNeighbour.size(); i++)
+        toLoveNeighbor.clear();
+        toLoveNeighbor.resize(agent.size());
+		for (int i = 0; i < (int)toLoveNeighbor.size(); i++)
 		{
-			lovedNeighbour[i] = rand() % (agent.size() - 1);
-			while (lovedNeighbour[i] == i)
+			toLoveNeighbor[i] = rand() % (agent.size() - 1);
+			while (toLoveNeighbor[i] == i)
 			{
-				lovedNeighbour[i] = rand() % (agent.size() - 1);
+				toLoveNeighbor[i] = rand() % (agent.size() - 1);
 			}
 		}
     }
@@ -97,7 +97,7 @@ struct MyApp : public App
             agent[i].moveF(moveSpeed);
 
             // then turn a little towards loved one
-            agent[i].faceToward(agent[lovedNeighbour[i]].pos(), turnSpeed);
+            agent[i].faceToward(agent[toLoveNeighbor[i]].pos(), turnSpeed);
         }
 
         // TODO: if as a never-nester how to improve dis code

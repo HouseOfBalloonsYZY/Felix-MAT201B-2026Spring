@@ -21,20 +21,20 @@ struct MyApp : public App
     Mesh mesh;
 
     std::vector<Nav> agent;
-    std::vector<int> lovedNeighbour;
+    std::vector<int> toLoveNeighbor;
 
 
 
     void randomlyFallInLove() 
     {
-        lovedNeighbour.clear();
-        lovedNeighbour.resize(agent.size());
-        for (auto& i : lovedNeighbour) 
+        toLoveNeighbor.clear();
+        toLoveNeighbor.resize(agent.size());
+        for (auto& i : toLoveNeighbor) 
         {
-            lovedNeighbour[i] = rand()%(agent.size() - 1);
-            while (lovedNeighbour[i] == i) 
+            toLoveNeighbor[i] = rand()%(agent.size() - 1);
+            while (toLoveNeighbor[i] == i) 
             {
-                lovedNeighbour[i] = rand()%(agent.size() - 1);
+                toLoveNeighbor[i] = rand()%(agent.size() - 1);
             }
         }
     }
@@ -84,10 +84,10 @@ struct MyApp : public App
             agent[i].step(dt);
 
             // then turn a little towards loved one
-            agent[i].faceTowardLine(agent[lovedNeighbour[i]].pos(), agent[i].uu(), dt); //confused by dt here, feels like i'm absuing dt
+            agent[i].faceTowardLine(agent[toLoveNeighbor[i]].pos(), agent[i].uu(), dt); //confused by dt here, feels like i'm absuing dt
             
             //dis one is fun
-            agent[i].nudgeToward(agent[lovedNeighbour[i]].pos(), 2);
+            agent[i].nudgeToward(agent[toLoveNeighbor[i]].pos(), 2);
         }
     }
 

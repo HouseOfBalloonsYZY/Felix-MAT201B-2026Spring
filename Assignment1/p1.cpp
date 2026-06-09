@@ -26,18 +26,18 @@ struct MyApp : public App
     Mesh mesh;
 
     std::vector<Nav> agent;
-    std::vector<int> lovedNeighbour;
+    std::vector<int> toLoveNeighbor;
 
     void randomlyFallInLove() 
     {
-        lovedNeighbour.clear();
-        lovedNeighbour.resize(agent.size());
-        for (auto& i : lovedNeighbour) 
+        toLoveNeighbor.clear();
+        toLoveNeighbor.resize(agent.size());
+        for (auto& i : toLoveNeighbor) 
         {
-            lovedNeighbour[i] = rand()%(agent.size() - 1);
-            while (lovedNeighbour[i] == i) 
+            toLoveNeighbor[i] = rand()%(agent.size() - 1);
+            while (toLoveNeighbor[i] == i) 
             {
-                lovedNeighbour[i] = rand()%(agent.size() - 1);
+                toLoveNeighbor[i] = rand()%(agent.size() - 1);
             }
         }
     }
@@ -90,7 +90,7 @@ struct MyApp : public App
             //first go a bit
             agent[i].moveF(moveSpeed);
             // then turn to love
-            agent[i].faceToward(agent[lovedNeighbour[i]].pos(), turnSpeed);
+            agent[i].faceToward(agent[toLoveNeighbor[i]].pos(), turnSpeed);
         }
 
         for (auto& a : agent) 

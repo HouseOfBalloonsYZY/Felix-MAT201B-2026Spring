@@ -25,7 +25,7 @@ struct AlloApp : App
     Parameter pointSize{"Point size", "", 5.0, 1.0, 10.0};
     Parameter timeStep{"Time step", "", 0.01, 0.001, 0.02};
     Parameter dragFactor{"Drag factor", "", 1.0, 0.00, 10.0};
-    Parameter repulsivity{"Repulsivity", "", 0.01, -1.0, 1.0};
+    Parameter repulsivity{"Repulsivity", "", 0.0001, -0.005, 0.005};
     Parameter springLength{"Spring length", "", 5.0, 0.1, 10.0};
     Parameter springTension{"Spring tension", "", 2.0, 0.1, 10.0};
 
@@ -72,9 +72,7 @@ struct AlloApp : App
             // float m = 3 + rnd::normal() / 2;
             // if (m < 0.5)
             //     m = 0.5;
-            float m = 1 + rnd::normal() / 2;
-            if (m < 0.5)
-                m = 0.5;
+            float m = 3 + rnd::normal() / 2;
             mass.push_back(m);
 
             // using a simplified volume/size relationship
